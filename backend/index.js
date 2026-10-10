@@ -7,7 +7,7 @@ import cors from "cors";
 const app = express();
 
 app.use(express.json());
-allowedOrigins = process.env.FRONTEND_URL.split(",").map(s => s.trim())
+const allowedOrigins = process.env.FRONTEND_URL.split(",").map(s => s.trim())
 app.use(cors({ origin: allowedOrigins }))
 
 connectDB();
