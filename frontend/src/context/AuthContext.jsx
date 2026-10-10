@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_URL = import.meta.env.VITE_API_URL;
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -43,6 +43,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     const result = await response.json();
+    console.log(result);
 
     if (!response.ok) {
       throw new Error(result.error || result.message || "Login failed");

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Play } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8000/api";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const CourseDetailPage = ({ title = "Striver System Design" }) => {
   const { token } = useAuth();
