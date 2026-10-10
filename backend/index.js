@@ -7,7 +7,7 @@ import cors from "cors";
 const app = express();
 
 app.use(express.json());
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL }));
 
 connectDB();
 
@@ -15,10 +15,14 @@ app.use("/api", userRouter);
 
 app.use("/api", videoRouter);
 
+app.get("/health", (req, res) => res.json({ ok: true }));
+
 app.use("/", (req, res) => {
   res.send("API is working!!");
 });
 
-app.listen(8000, () => {
-  console.log("App is running at port 8000");
+const PORT = process.env.PORT || 8000;
+
+app.listen(PORT, () => {
+  console.log(`App is running at port ${PORT}`);
 });
