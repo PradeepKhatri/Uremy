@@ -6,6 +6,8 @@ const LoginPage = () => {
   const navigate = useNavigate();
   const { login, signUp } = useAuth();
 
+  const [name, setName] = useState("");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -18,17 +20,20 @@ const LoginPage = () => {
     event.preventDefault();
     setError("");
 
-    if (!email || !password) {
-      setError("Please fill in both email and password.");
-      return;
-    }
-
     setIsLoading(true);
 
     try {
       if (isSignUp) {
-        await signUp({ email, password });
+        if (!name || !email || !password) {
+          setError("Please fill in all fields.");
+          return;
+        }
+        await signUp({ name, email, password });
       } else {
+        if (!email || !password) {
+          setError("Please fill in all fields.");
+          return;
+        }
         await login({ email, password });
       }
 
@@ -48,10 +53,10 @@ const LoginPage = () => {
             ▶
           </div>
           <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-            {isSignUp ? "Create your account" : "Sign in to your account"}
+            {isSignUp ? "New to Uremy?" : "Sign in to your Uremy account"}
           </h2>
           <p className="mt-2 text-sm text-slate-400">
-            Access your custom Cloudflare R2 video learning dashboard
+            Access your Video Learning dashboard
           </p>
         </div>
 
@@ -63,6 +68,28 @@ const LoginPage = () => {
           )}
 
           <form className="space-y-5" onSubmit={handleSubmit}>
+            {isSignUp && (
+              <div>
+                <label
+                  htmlFor="name"
+                  className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-1.5"
+                >
+                  Name
+                </label>
+                <input
+                  id="name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(event) => setName(event.target.value)}
+                  placeholder="John Doe"
+                  className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
+                />
+              </div>
+            )}
+
             <div>
               <label
                 htmlFor="email"
@@ -78,7 +105,7 @@ const LoginPage = () => {
                 required
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
-                placeholder="you@example.com"
+                placeholder="John@example.com"
                 className="w-full px-4 py-2.5 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 transition-colors"
               />
             </div>
