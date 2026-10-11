@@ -6,7 +6,24 @@ import { getVideoUrl } from "../r2.js";
 
 const getVideos = async (req, res) => {
   try {
-    const { rows } = await pool.query("SELECT * FROM videos ORDER BY id");
+    const userId = req.user.id;
+
+    // const { rows } = await pool.query("SELECT * FROM videos ORDER BY id");
+
+    const { rows } = await pool.query(
+      `SELECT 
+        v.id, 
+        v.title,
+        v.object_key, 
+        COALESCE(p.status, 'pending') AS status,
+        COALESCE(p.revisit, FALSE) AS revisit
+         FROM videos v
+        LEFT JOIN user_video_progress p 
+        ON v.id = p.video_id AND p.user_id = $1
+        ORDER BY v.id
+      `,
+      [userId],
+    );
 
     res.status(200).json(rows);
   } catch (error) {
@@ -16,15 +33,32 @@ const getVideos = async (req, res) => {
 
 const getVideo = async (req, res) => {
   try {
+    const userId = req.user.id;
+
     const { id } = req.params;
 
     if (!id) {
       return res.status(400).json({ message: "Video ID is required" });
     }
 
+    // const { rows } = await pool.query(
+    //   `SELECT object_key, title FROM videos WHERE id = $1`,
+    //   [id],
+    // );
+
     const { rows } = await pool.query(
-      `SELECT object_key, title FROM videos WHERE id = $1`,
-      [id],
+      `SELECT
+         v.id,
+         v.title,
+         v.object_key,
+         COALESCE(p.status, 'pending') AS status,
+         COALESCE(p.revisit, FALSE) AS revisit
+       FROM videos v
+       LEFT JOIN user_video_progress p
+         ON p.video_id = v.id
+         AND p.user_id = $2
+       WHERE v.id = $1`,
+      [Number(id), userId],
     );
 
     if (rows.length === 0) {
@@ -44,6 +78,7 @@ const USER_ID = 1;
 
 const updateProgress = async (req, res) => {
   try {
+    const userId = req.user.id;
     const videoId = Number(req.params.id);
 
     if (!Number.isInteger(videoId) || videoId <= 0) {
@@ -57,7 +92,7 @@ const updateProgress = async (req, res) => {
       fields.status = status;
     }
 
-    if (revisit != undefined) {
+    if (revisit !== undefined) {
       fields.revisit = revisit;
     }
 
@@ -73,25 +108,30 @@ const updateProgress = async (req, res) => {
       return res.status(400).json({ error: "No valid fields provided" });
     }
 
-    // $1 is the id, so the field values start at $2
-    const setClause = columns.map((c, i) => `${c} = $${i + 2}`).join(", ");
-    const values = [videoId, ...columns.map((c) => fields[c])];
+    const insertColumns = ["user_id", "video_id", ...columns];
+    const insertValues = [
+      userId,
+      videoId,
+      ...columns.map((column) => fields[column]),
+    ];
+    const insertPlaceholders = insertColumns
+      .map((_, index) => `$${index + 1}`)
+      .join(", ");
+
+    const setClause = columns
+      .map((column, index) => `${column} = EXCLUDED.${column}`)
+      .join(", ");
 
     const { rows } = await pool.query(
-      `UPDATE videos
-       SET ${setClause}
-       WHERE id = $1
-       RETURNING id, status, revisit`,
-      values,
+      `INSERT INTO user_video_progress (${insertColumns.join(", ")})
+       VALUES (${insertPlaceholders})
+       ON CONFLICT (user_id, video_id)
+       DO UPDATE SET ${setClause}
+       RETURNING user_id, video_id, status, revisit`,
+      insertValues,
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "Video not found" });
-    }
-
-    console.log(rows);
-
-    res.json(rows[0]);
+    return res.json(rows[0]);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: "Server error" });

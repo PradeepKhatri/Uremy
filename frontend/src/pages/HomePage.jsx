@@ -30,11 +30,8 @@ const HomePage = () => {
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="bg-gradient-to-r from-indigo-900/40 via-slate-900 to-slate-900 border border-indigo-500/20 rounded-2xl p-6 sm:p-8">
-          <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 block">
-            Welcome Back
-          </span>
           <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2">
-            Ready to continue learning{user?.name ? `, ${user.name}` : ""}?
+            Welcome Back {user?.name ? `, ${user.name}` : ""}!
           </h2>
           <p className="text-sm text-slate-400 max-w-2xl">
             Select a course below to jump directly into video lessons, track

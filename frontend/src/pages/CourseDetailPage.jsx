@@ -52,6 +52,7 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
       }
 
       const data = await response.json();
+
       setVideos(Array.isArray(data) ? data : []);
     } catch (fetchError) {
       console.error("Error getting videos:", fetchError);
@@ -80,6 +81,7 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
 
       const data = await response.json();
       setVideoUrl(data.url || "");
+      // setPlayingVideo(data)
     } catch (fetchError) {
       console.error("Error getting video:", fetchError);
       setVideoLoadError("Video could not be loaded. Please try again.");
@@ -116,28 +118,44 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
 
   const toggleComplete = async (id, status) => {
     const nextStatus = status === "completed" ? "pending" : "completed";
-    const updated = await updateProgress(id, { status: nextStatus });
 
-    if (!updated) return;
+    try {
+      const updatedVideo = await updateProgress(id, { status: nextStatus });
 
-    setVideos((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, status: nextStatus } : item,
-      ),
-    );
+      if (!updatedVideo) {
+        return;
+      }
+
+      setVideos((prev) =>
+        prev.map((video) =>
+          video.id === id ? { ...video, status: nextStatus } : video,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update completion:", error);
+      setError("Unable to update course progress. Please try again.");
+    }
   };
 
   const toggleRevisit = async (id, revisit) => {
     const nextRevisit = !revisit;
-    const updated = await updateProgress(id, { revisit: nextRevisit });
 
-    if (!updated) return;
+    try {
+      const updatedVideo = await updateProgress(id, { revisit: nextRevisit });
 
-    setVideos((previous) =>
-      previous.map((item) =>
-        item.id === id ? { ...item, revisit: nextRevisit } : item,
-      ),
-    );
+      if (!updatedVideo) {
+        return;
+      }
+
+      setVideos((prev) =>
+        prev.map((video) =>
+          video.id === id ? { ...video, revisit: nextRevisit } : video,
+        ),
+      );
+    } catch (error) {
+      console.error("Failed to update revisit flag:", error);
+      setError("Unable to update revisit flag. Please try again.");
+    }
   };
 
   return (
@@ -145,7 +163,11 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
       <div className="max-w-6xl mx-auto space-y-8">
         <header className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-4 shadow-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="space-y-1">
+            <div className="">
+              <span className="text-slate-600 text-sm font-bold pd-3">
+                Home / {title}
+              </span>
+
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-white tracking-tight">
                 {title}
               </h1>

@@ -1,5 +1,6 @@
 CREATE TABLE users (
     id            SERIAL PRIMARY KEY,
+    name      TEXT NOT NULL,
     email         TEXT UNIQUE NOT NULL,
     password      TEXT NOT NULL,
     created_at    TIMESTAMP DEFAULT NOW()
@@ -12,6 +13,15 @@ CREATE TABLE videos (
     status        TEXT DEFAULT 'pending',
     revisit       BOOLEAN DEFAULT FALSE,
     created_at    TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE user_video_progress (
+    user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    video_id   INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
+    status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
+    revisit    BOOLEAN NOT NULL DEFAULT FALSE,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, video_id)
 );
 
 INSERT INTO videos (title, object_key) VALUES

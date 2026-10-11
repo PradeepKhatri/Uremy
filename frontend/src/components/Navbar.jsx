@@ -1,7 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const Navbar = () => {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
 
   return (
     <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-40">
@@ -10,7 +12,7 @@ const Navbar = () => {
           <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-bold flex items-center justify-center text-lg">
             ▶
           </div>
-          <div>
+          <div onClick={() => navigate("/home")} className="cursor-pointer">
             <h1 className="text-base font-bold text-white leading-tight">
               Uremy
             </h1>
@@ -21,7 +23,7 @@ const Navbar = () => {
         <div className="flex items-center gap-4">
           <div className="hidden sm:flex flex-col text-right">
             <span className="text-xs font-semibold text-white">
-              {user?.email || "Student"}
+              {user?.name || "Student"}
             </span>
             <span className="text-[10px] text-emerald-400 font-medium">
               Active Learner
