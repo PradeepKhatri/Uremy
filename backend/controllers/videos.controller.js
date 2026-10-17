@@ -8,7 +8,7 @@ const getVideos = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    // const { rows } = await pool.query("SELECT * FROM videos ORDER BY id");
+    const { courseId } = req.params;
 
     const { rows } = await pool.query(
       `SELECT 
@@ -20,9 +20,10 @@ const getVideos = async (req, res) => {
          FROM videos v
         LEFT JOIN user_video_progress p 
         ON v.id = p.video_id AND p.user_id = $1
+        WHERE course_id = $2
         ORDER BY v.id
       `,
-      [userId],
+      [userId, courseId],
     );
 
     res.status(200).json(rows);
@@ -35,16 +36,11 @@ const getVideo = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    const { id } = req.params;
+    const { courseId, videoId } = req.params;
 
-    if (!id) {
+    if (!videoId) {
       return res.status(400).json({ message: "Video ID is required" });
     }
-
-    // const { rows } = await pool.query(
-    //   `SELECT object_key, title FROM videos WHERE id = $1`,
-    //   [id],
-    // );
 
     const { rows } = await pool.query(
       `SELECT
@@ -56,9 +52,10 @@ const getVideo = async (req, res) => {
        FROM videos v
        LEFT JOIN user_video_progress p
          ON p.video_id = v.id
-         AND p.user_id = $2
-       WHERE v.id = $1`,
-      [Number(id), userId],
+         AND p.user_id = $3
+       WHERE v.course_id = $1
+     AND v.id = $2`,
+      [Number(courseId), Number(videoId), userId],
     );
 
     if (rows.length === 0) {
@@ -79,7 +76,7 @@ const USER_ID = 1;
 const updateProgress = async (req, res) => {
   try {
     const userId = req.user.id;
-    const videoId = Number(req.params.id);
+    const videoId = Number(req.params.videoId);
 
     if (!Number.isInteger(videoId) || videoId <= 0) {
       return res.status(400).json({ error: "Invalid video id" });

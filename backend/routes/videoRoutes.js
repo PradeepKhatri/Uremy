@@ -8,8 +8,8 @@ import {
 
 const router = express.Router();
 
-router.get("/videos", authenticate, getVideos);
-router.get("/video/:id", authenticate, getVideo);
-router.patch("/videos/:id", authenticate, updateProgress);
+router.get("/videos/:courseId", authenticate, getVideos);
+router.get("/video/:courseId/:videoId", authenticate, getVideo);
+router.patch("/videos/:videoId", authenticate, updateProgress);
 
 export default router;

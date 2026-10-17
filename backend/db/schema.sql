@@ -8,15 +8,27 @@ CREATE TABLE users (
 
 CREATE TABLE videos (
     id            SERIAL PRIMARY KEY,
+    course_id     INTEGER REFERENCES courses(id) ON DELETE CASCADE,
     title         TEXT NOT NULL,
     object_key    TEXT NOT NULL UNIQUE,
-    status        TEXT DEFAULT 'pending',
-    revisit       BOOLEAN DEFAULT FALSE,
     created_at    TIMESTAMP DEFAULT NOW()
+);
+
+CREATE TABLE courses (
+    id           SERIAL PRIMARY KEY,
+    title        TEXT NOT NULL,
+    description  TEXT,
+    price        INTEGER NOT NULL,       
+    currency     TEXT NOT NULL DEFAULT 'INR',
+    totalvideos  INTEGER NOT NULL DEFAULT 20,
+    instructor   INTEGER NOT NULL DEFAULT 'Unknown',
+    thumbnail    TEXT DEFAULT '',
+    created_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE user_video_progress (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    course_id  INTEGER NOT NULL references courses(id) ON DELETE CASCADE,
     video_id   INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
     status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
     revisit    BOOLEAN NOT NULL DEFAULT FALSE,
