@@ -29,7 +29,7 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
   const progressPercent =
     totalVideos > 0 ? Math.round((completedCount / totalVideos) * 100) : 0;
 
-  const getVideos = async () => {
+  const getVideos = async (courseId) => {
     if (!token) {
       setLoading(false);
       return;
@@ -39,7 +39,10 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
       setLoading(true);
       setError("");
 
-      const response = await fetch(`${API_URL}/videos`, {
+      console.log("Course ID:", courseId);
+      console.log("Request URL:", `${API_URL}/videos/${courseId}`);
+
+      const response = await fetch(`${API_URL}/videos/${courseId}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -53,6 +56,8 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
 
       const data = await response.json();
 
+      console.log(data);
+
       setVideos(Array.isArray(data) ? data : []);
     } catch (fetchError) {
       console.error("Error getting videos:", fetchError);
@@ -62,12 +67,12 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
     }
   };
 
-  const generateVideoUrl = async (id) => {
+  const generateVideoUrl = async (courseId, id) => {
     if (!token) return;
 
     try {
       setVideoLoadError("");
-      const response = await fetch(`${API_URL}/video/${id}`, {
+      const response = await fetch(`${API_URL}/video/${courseId}/${id}`, {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -113,7 +118,7 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
   };
 
   useEffect(() => {
-    getVideos();
+    getVideos(1);
   }, [token]);
 
   const toggleComplete = async (id, status) => {
@@ -276,7 +281,7 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
                         <button
                           type="button"
                           onClick={() => {
-                            generateVideoUrl(video.id);
+                            generateVideoUrl(1, video.id);
                             setPlayingVideo(video);
                           }}
                           className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-medium transition-all shadow-sm active:scale-95"
@@ -363,6 +368,7 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
                 <div className="w-full aspect-video bg-black rounded-xl border border-slate-800/80 overflow-hidden flex items-center justify-center shadow-lg">
                   {videoUrl ? (
                     <video
+                      controlsList="nodownload"
                       controls
                       autoPlay
                       playsInline
@@ -371,13 +377,13 @@ const CourseDetailPage = ({ title = "Striver System Design" }) => {
                       className="w-full h-full object-contain"
                       onError={() => {
                         setVideoLoadError(
-                          "Video load failed. Check if your Cloudflare R2 bucket CORS settings allow your domain origin, or if the presigned URL has expired.",
+                          "Something went wrong. Video is not available.",
                         );
                       }}
                     />
                   ) : (
                     <div className="text-slate-400 text-sm animate-pulse p-4">
-                      {videoLoadError || "Generating secure video stream..."}
+                      {videoLoadError || "Loading..."}
                     </div>
                   )}
                 </div>

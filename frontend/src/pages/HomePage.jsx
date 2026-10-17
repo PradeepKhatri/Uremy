@@ -1,30 +1,36 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useEffect, useState } from "react";
 
-const SAMPLE_COURSES = [
-  {
-    id: "course-1",
-    title: "Striver Low Level Design",
-    category: "Development",
-    description:
-      "Master modern web development from setup to production deployment using Cloudflare & React.",
-    thumbnail:
-      "https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800&auto=format&fit=crop",
-    totalVideos: 53,
-    completedVideos: 0,
-    duration: "16 hrs",
-    instructor: "Striver",
-    badge: "Popular",
-  },
-];
+const API_URL = import.meta.env.VITE_API_URL;
 
 const HomePage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  const [courses, setCourses] = useState([]);
+  const [error, setError] = useState("");
+
   const onSelectCourse = (courseId) => {
     navigate(`/courses?course=${courseId}`);
   };
+
+  const getCourses = async () => {
+    try {
+      const response = await fetch(`${API_URL}/courses`);
+
+      const data = await response.json();
+
+      setCourses(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error("Error getting Courses:", error);
+      setError("Unable to load Courses. Please try again.");
+    }
+  };
+
+  useEffect(() => {
+    getCourses();
+  }, []);
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 font-sans">
@@ -40,9 +46,10 @@ const HomePage = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {SAMPLE_COURSES.map((course) => {
+          {courses.map((course) => {
             const progressPercent = Math.round(
-              (course.completedVideos / course.totalVideos) * 100,
+              // (course.completedVideos / course.totalVideos) * 100,
+              20,
             );
 
             return (
@@ -60,15 +67,9 @@ const HomePage = () => {
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
 
-                  <span className="absolute top-3 left-3 px-2.5 py-1 bg-slate-950/80 backdrop-blur-md text-indigo-300 border border-indigo-500/30 rounded-md text-[10px] font-semibold">
-                    {course.category}
+                  <span className="absolute top-3 right-3 px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-bold">
+                    Popular
                   </span>
-
-                  {course.badge && (
-                    <span className="absolute top-3 right-3 px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-bold">
-                      {course.badge}
-                    </span>
-                  )}
                 </div>
 
                 <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
@@ -84,7 +85,7 @@ const HomePage = () => {
                   <div className="space-y-3 pt-2 border-t border-slate-800/80">
                     <div className="flex items-center justify-between text-xs">
                       <span className="text-slate-400">
-                        {course.completedVideos} / {course.totalVideos} Videos
+                        20/ {course.totalvideos} Videos
                       </span>
                       <span className="font-semibold text-slate-200">
                         {progressPercent}%
@@ -100,7 +101,6 @@ const HomePage = () => {
 
                     <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                       <span>Instructor: {course.instructor}</span>
-                      <span>{course.duration}</span>
                     </div>
                   </div>
                 </div>

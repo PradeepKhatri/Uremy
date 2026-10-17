@@ -2,17 +2,20 @@ import express from "express";
 import { connectDB } from "./db/connection.js";
 import videoRouter from "./routes/videoRoutes.js";
 import userRouter from "./routes/userRoutes.js";
+import courseRouter from "./routes/courseRoutes.js";
 import cors from "cors";
 
 const app = express();
 
 app.use(express.json());
-const allowedOrigins = process.env.FRONTEND_URL.split(",").map(s => s.trim())
-app.use(cors({ origin: allowedOrigins }))
+const allowedOrigins = process.env.FRONTEND_URL.split(",").map((s) => s.trim());
+app.use(cors({ origin: allowedOrigins }));
 
 connectDB();
 
 app.use("/api", userRouter);
+
+app.use("/api", courseRouter);
 
 app.use("/api", videoRouter);
 
