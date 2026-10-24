@@ -22,18 +22,39 @@ CREATE TABLE courses (
     currency     TEXT NOT NULL DEFAULT 'INR',
     totalvideos  INTEGER NOT NULL DEFAULT 20,
     instructor   INTEGER NOT NULL DEFAULT 'Unknown',
-    thumbnail    TEXT DEFAULT '',
+    thumbnail    TEXT DEFAULT 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=800&auto=format&fit=crop',
     created_at   TIMESTAMPTZ DEFAULT NOW()
 );
 
 CREATE TABLE user_video_progress (
     user_id    INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    course_id  INTEGER NOT NULL references courses(id) ON DELETE CASCADE,
     video_id   INTEGER NOT NULL REFERENCES videos(id) ON DELETE CASCADE,
     status     TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed')),
     revisit    BOOLEAN NOT NULL DEFAULT FALSE,
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (user_id, video_id)
+);
+
+CREATE TABLE payments (
+    id                  SERIAL PRIMARY KEY,
+    user_id             INTEGER NOT NULL REFERENCES users(id),
+    course_id           INTEGER NOT NULL REFERENCES courses(id),
+    gateway_order_id    TEXT UNIQUE NOT NULL,
+    gateway_payment_id  TEXT UNIQUE,         
+    amount              INTEGER NOT NULL,    
+    currency            TEXT NOT NULL,
+    status              TEXT NOT NULL DEFAULT 'created'
+                        CHECK (status IN ('created', 'paid', 'failed')),
+    created_at          TIMESTAMPTZ DEFAULT NOW(),
+    updated_at          TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE enrollments (
+    user_id     INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    course_id   INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE,
+    payment_id  INTEGER REFERENCES payments(id),   
+    enrolled_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (user_id, course_id)             
 );
 
 INSERT INTO videos (title, object_key) VALUES

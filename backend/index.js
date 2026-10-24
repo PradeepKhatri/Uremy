@@ -3,6 +3,7 @@ import { connectDB } from "./db/connection.js";
 import videoRouter from "./routes/videoRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import courseRouter from "./routes/courseRoutes.js";
+import paymentRouter from "./routes/paymentRoutes.js";
 import cors from "cors";
 
 const app = express();
@@ -18,6 +19,8 @@ app.use("/api", userRouter);
 app.use("/api", courseRouter);
 
 app.use("/api", videoRouter);
+
+app.use("/api", paymentRouter);
 
 app.get("/health", (req, res) => res.json({ ok: true }));
 

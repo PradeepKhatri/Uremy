@@ -10,23 +10,79 @@ const getVideos = async (req, res) => {
 
     const { courseId } = req.params;
 
-    const { rows } = await pool.query(
-      `SELECT 
-        v.id, 
-        v.title,
-        v.object_key, 
-        COALESCE(p.status, 'pending') AS status,
-        COALESCE(p.revisit, FALSE) AS revisit
-         FROM videos v
-        LEFT JOIN user_video_progress p 
-        ON v.id = p.video_id AND p.user_id = $1
-        WHERE course_id = $2
-        ORDER BY v.id
-      `,
+    // if (!Number.isInteger(courseId) || courseId <= 0) {
+    //   return res.status(400).json({
+    //     error: "Invalid course ID",
+    //   });
+    // }
+
+    const courseResult = await pool.query(
+      `SELECT
+          c.id,
+          c.title,
+          c.description,
+          c.price,
+          c.currency,
+          c.totalvideos,
+          c.instructor,
+          c.thumbnail,
+          EXISTS (
+            SELECT 1
+            FROM enrollments e
+            WHERE e.user_id = $1
+              AND e.course_id = c.id
+          ) AS "isEnrolled"
+       FROM courses c
+       WHERE c.id = $2`,
       [userId, courseId],
     );
 
-    res.status(200).json(rows);
+    if (courseResult.rows.length === 0) {
+      return res.status(404).json({
+        error: "Course not found",
+      });
+    }
+
+    const course = courseResult.rows[0];
+    let videos;
+
+    if (course.isEnrolled) {
+      const videoResults = await pool.query(
+        `SELECT   
+          v.id, 
+          v.title,
+          v.object_key, 
+          COALESCE(p.status, 'pending') AS status,
+          COALESCE(p.revisit, FALSE) AS revisit
+        FROM videos v
+        LEFT JOIN user_video_progress p 
+          ON v.id = p.video_id AND p.user_id = $1
+        WHERE course_id = $2
+        ORDER BY v.id
+      `,
+        [userId, courseId],
+      );
+
+      videos = videoResults.rows;
+    } else {
+      const videoResults = await pool.query(
+        `SELECT 
+          v.id, 
+          v.title
+        FROM videos v
+        WHERE course_id = $1
+      `,
+        [courseId],
+      );
+
+      videos = videoResults.rows;
+    }
+
+    return res.status(200).json({
+      course,
+      isEnrolled: course.isEnrolled,
+      videos,
+    });
   } catch (error) {
     res.status(500).send(`Error fetching videos ${error}`);
   }
