@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useEffect, useState } from "react";
+import { Tag } from "lucide-react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -159,9 +160,12 @@ const HomePage = () => {
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent"></div>
 
-                      <span className="absolute top-3 right-3 px-2 py-0.5 bg-indigo-600 text-white rounded text-[10px] font-bold">
-                        Popular
-                      </span>
+                      <div className="absolute bottom-3 right-3 mb-3 flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 bg-indigo-600 text-white rounded text-[15px] font-bold px-2 py-0.5">
+                          <Tag size={13} />
+                          40% OFF
+                        </span>
+                      </div>
                     </div>
 
                     <div className="p-5 flex-1 flex flex-col justify-between space-y-4">
@@ -170,20 +174,25 @@ const HomePage = () => {
                           <h3 className="line-clamp-1 text-base font-bold text-white transition-colors duration-200 group-hover:text-indigo-400">
                             {course.title}
                           </h3>
-
-                          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-400">
-                            {course.description ||
-                              "Explore this course and start learning."}
-                          </p>
                         </div>
 
-                        <span className="shrink-0 rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-1.5 text-sm font-semibold text-emerald-400">
-                          {new Intl.NumberFormat("en-IN", {
-                            style: "currency",
-                            currency: course.currency || "INR",
-                            maximumFractionDigits: 2,
-                          }).format(Number(course.price) || 0)}
-                        </span>
+                        <div className="flex flex-wrap items-baseline gap-3">
+                          <span className="text-xl font-extrabold tracking-tight text-white">
+                            {new Intl.NumberFormat("en-IN", {
+                              style: "currency",
+                              currency: course.currency || "INR",
+                              maximumFractionDigits: 2,
+                            }).format(Number(course.price))}
+                          </span>
+
+                          <span className="text-base text-slate-300 line-through decoration-indigo-600 decoration-2">
+                            {new Intl.NumberFormat("en-IN", {
+                              style: "currency",
+                              currency: course.currency || "INR",
+                              maximumFractionDigits: 2,
+                            }).format(Number(course.price) / 0.6)}
+                          </span>
+                        </div>
                       </div>
 
                       <div className="space-y-3 pt-2 border-t border-slate-800/80">
@@ -191,6 +200,10 @@ const HomePage = () => {
                           <span>Instructor: {course.instructor}</span>
                         </div>
                       </div>
+                    </div>
+                    <div className="px-5 py-3 bg-slate-950/50 border-t border-slate-800/80 flex items-center justify-between text-xs font-medium text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                      <span>View Course</span>
+                      <span>→</span>
                     </div>
                   </button>
                 </article>
