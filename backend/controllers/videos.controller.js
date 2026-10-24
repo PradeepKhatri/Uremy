@@ -10,12 +10,6 @@ const getVideos = async (req, res) => {
 
     const { courseId } = req.params;
 
-    // if (!Number.isInteger(courseId) || courseId <= 0) {
-    //   return res.status(400).json({
-    //     error: "Invalid course ID",
-    //   });
-    // }
-
     const courseResult = await pool.query(
       `SELECT
           c.id,
@@ -31,7 +25,16 @@ const getVideos = async (req, res) => {
             FROM enrollments e
             WHERE e.user_id = $1
               AND e.course_id = c.id
-          ) AS "isEnrolled"
+          ) AS "isEnrolled",
+          (
+            SELECT COUNT(*)
+            FROM videos v
+            INNER JOIN user_video_progress p
+            ON p.video_id = v.id
+            WHERE v.course_id = c.id
+            AND p.user_id = $1
+            AND p.status = 'completed'
+        ) AS "completedvideos"
        FROM courses c
        WHERE c.id = $2`,
       [userId, courseId],

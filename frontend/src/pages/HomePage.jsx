@@ -67,8 +67,7 @@ const HomePage = () => {
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {enrolledCourses.map((course) => {
                 const progressPercent = Math.round(
-                  // (course.completedVideos / course.totalVideos) * 100,
-                  20,
+                  (course.completedVideos / course.totalvideos) * 100,
                 );
 
                 return (
@@ -102,7 +101,8 @@ const HomePage = () => {
                         <div className="space-y-3 pt-2 border-t border-slate-800/80">
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-slate-400">
-                              20/ {course.totalvideos} Videos
+                              {course.completedVideos}/ {course.totalvideos}{" "}
+                              Videos
                             </span>
                             <span className="font-semibold text-slate-200">
                               {progressPercent}%
