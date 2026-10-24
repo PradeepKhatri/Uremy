@@ -519,11 +519,6 @@ const CourseDetailPage = () => {
                           You're enrolled!
                         </span>
                       </div>
-
-                      <p className="text-sm leading-6 text-slate-400">
-                        You already have access to this course. Continue
-                        learning from where you left off.
-                      </p>
                     </>
                   ) : (
                     <>
