@@ -54,11 +54,6 @@ const CourseDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [videoLoadError, setVideoLoadError] = useState("");
 
-  const completedCount = useMemo(() => {
-    if (!Array.isArray(videos)) return 0;
-    return videos.filter((video) => video.status === "completed").length;
-  }, [videos]);
-
   const revisitCount = useMemo(() => {
     if (!Array.isArray(videos)) return 0;
     return videos.filter((video) => Boolean(video.revisit)).length;
@@ -67,7 +62,9 @@ const CourseDetailPage = () => {
   const totalVideos = videos.length;
 
   const progressPercent =
-    totalVideos > 0 ? Math.round((completedCount / totalVideos) * 100) : 0;
+    totalVideos > 0
+      ? Math.round((course.completedvideos / course.totalvideos) * 100)
+      : 0;
 
   const getVideos = async (courseId) => {
     if (!token) {
@@ -421,7 +418,7 @@ const CourseDetailPage = () => {
                       <p className="mt-1 text-xs leading-5 text-slate-400">
                         {progressPercent === 100
                           ? "You've completed every lesson."
-                          : `${Math.max(totalVideos - completedCount, 0)} lessons left to complete`}
+                          : `${Math.max(course.totalvideos - course.completedvideos, 0)} lessons left to complete`}
                       </p>
                     </div>
                   </div>
@@ -432,7 +429,7 @@ const CourseDetailPage = () => {
                         Overall completion
                       </span>
                       <span className="font-semibold tabular-nums text-indigo-300">
-                        {completedCount}/{totalVideos}
+                        {course.completedvideos}/{course.totalvideos}
                       </span>
                     </div>
 
@@ -461,7 +458,7 @@ const CourseDetailPage = () => {
                       </div>
 
                       <p className="mt-2 text-xl font-bold tabular-nums text-white">
-                        {completedCount}
+                        {course.completedvideos}
                         <span className="ml-1 text-xs font-normal text-slate-500">
                           lessons
                         </span>

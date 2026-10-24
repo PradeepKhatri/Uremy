@@ -12,7 +12,16 @@ const GetEnrolledCourses = async (req, res) => {
         c.description, 
         c.totalvideos, 
         c.instructor, 
-        c.thumbnail
+        c.thumbnail,
+        (
+            SELECT COUNT(*)
+            FROM videos v
+            INNER JOIN user_video_progress p
+            ON p.video_id = v.id
+            WHERE v.course_id = c.id
+            AND p.user_id = $1
+            AND p.status = 'completed'
+        ) AS "completedVideos"
         FROM courses c
         INNER JOIN enrollments e
         ON e.course_id = c.id
